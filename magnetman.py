@@ -7,7 +7,8 @@ class MagnetMan(object):
     SUBMIT_DELAY    = .7
     LID_TOLERANCE   = .5
 
-    def __init__(self, kbname, lidname):
+    def __init__(self, user=None, kbname="keyboard", lidname="Lid"):
+        self.user = user
         self.key = next(InputDevice(dev) for dev in list_devices() if kbname in InputDevice(dev).name)
         self.lid = next(InputDevice(dev) for dev in list_devices() if lidname in InputDevice(dev).name)
         self.loop = asyncio.get_event_loop()
@@ -45,7 +46,10 @@ class MagnetMan(object):
                     break
             else:
                 print("executing '{}'...".format(action))
-                Popen(action, shell=True)
+                if self.user:
+                    Popen(['/usr/bin/su', self.user, '-c', action])
+                else:
+                    Popen(action, shell=True)
                 break
         else:
             print("no command found for {}".format(sequence))
@@ -100,6 +104,8 @@ if __name__ == "__main__":
                         help="evdev name of the Lid Switch")
     parser.add_argument('-k', '--kbrd', default="keyboard",
                         help="evdev name of the keyboard")
+    parser.add_argument('-u', '--user',
+                        help="user to 'su' into before executing commands")
     parser.add_argument('rule', nargs='*', default=['.1.1:killall i3lock', '..a:echo test'],
                         help="""Rule definition syntax:
                         <sequence>:<command>
@@ -113,7 +119,7 @@ if __name__ == "__main__":
                         """)
     args = parser.parse_args()
 
-    magnetman = MagnetMan(args.kbrd, args.lid)
+    magnetman = MagnetMan(user=args.user, kbname=args.kbrd, lidname=args.lid)
 
     for rule in args.rule:
         rule, action = rule.split(":", 1)

@@ -25,6 +25,7 @@ Elevated privileges may be required to access the lidswitch or grab the keyboard
       -h, --help            show this help message and exit
       -l LID, --lid LID     evdev name of the Lid Switch
       -k KBRD, --kbrd KBRD  evdev name of the keyboard
+      -u USER, --user USER  user to 'su' into before executing commands
 
 A rule consists of the sequence to match, followed by a colon (`:`) and the command string to execute.
 Sequences are strings of lowercase characters, didigts and periods, representing keypresses, lid holds (the digit is the hold length in seconds) and taps.
@@ -38,7 +39,7 @@ More sophisticated rules can be created via the method `add_rule`:
 
 ```python
 from magnetman import MagnetMan
-magnetman = MagnetMan("keyboard", "Lid")
+magnetman = MagnetMan(kbname="keyboard", lidname="Lid", user="s0lll0s")
 magnetman.add_rule(['tap', 'a', 1, (1, 3), 'tap'], "echo test")
 magnetman.watch()
 ```

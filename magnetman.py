@@ -1,5 +1,5 @@
-import os
 import asyncio
+from subprocess import Popen
 from evdev import InputDevice, ecodes, categorize, list_devices
 
 class MagnetMan(object):
@@ -45,20 +45,20 @@ class MagnetMan(object):
                     break
             else:
                 print("executing '{}'...".format(action))
-                os.system(action)
+                Popen(action, shell=True)
                 break
         else:
             print("no command found for {}".format(sequence))
 
     def finish(self):
-        self.process(self.sequence)
-        self.sequence.clear()
-
         if self.listening:
             try:
                 self.key.ungrab()
                 self.listening = False
             except IOError: pass
+
+        self.process(self.sequence)
+        self.sequence.clear()
 
     def reschedule(self):
         if self.finish_handle:

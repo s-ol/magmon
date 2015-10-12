@@ -29,6 +29,7 @@ Elevated privileges may be required to access the lidswitch or grab the keyboard
                             specify a rule with python sequence syntax
       -r [RULE [RULE ...]], --rule [RULE [RULE ...]]
                             specify a rule with simplified sequence syntax
+      -s, --show            print list of rules
 
     all rules are formatted as sequence:command.
 
@@ -50,7 +51,7 @@ Simplified sequences are strings of lowercase characters, didigts and periods, r
 
 Example:
 
-    sudo python magnetman.py '...:echo three taps' '.2a:echo tap, two second hold and an A'
+    sudo python magnetman.py -u s0lll0s -r '...:echo three taps' -r '.2a:echo tap, two second hold and an A'
 
 Python sequences work like in the python module and are simply parsed using `eval()`.
 

@@ -45,8 +45,7 @@ class MagnetMan(object):
                 if type(exp) == tuple:
                     if act < exp[0] or act > exp[1]:
                         break
-                else:
-                    break
+                else: break
             else:
                 print("executing '{}'...".format(action))
                 if self.user:
@@ -130,6 +129,8 @@ if __name__ == "__main__":
                         help="specify a rule with python sequence syntax")
     parser.add_argument('-r', '--rule', nargs='*', default=[],
                         help="specify a rule with simplified sequence syntax")
+    parser.add_argument('-s', '--show', action='store_true',
+                        help="print list of rules")
     args = parser.parse_args()
 
     magnetman = MagnetMan(user=args.user, kbname=args.kbrd, lidname=args.lid)
@@ -153,5 +154,9 @@ if __name__ == "__main__":
                 except ValueError:
                     seq.append(char)
         magnetman.add_command(seq, action)
+
+    if args.show:
+        for pat in magnetman.patterns:
+            print("'{}' on {}".format(pat[1], pat[0]))
 
     magnetman.watch()

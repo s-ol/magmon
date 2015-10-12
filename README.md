@@ -16,26 +16,46 @@ Elevated privileges may be required to access the lidswitch or grab the keyboard
 ### "standalone"
 *Magnetman* comes with a convenient CLI for defining rules on the commandline.
 
-    usage: magnetman.py [-h] [-l LID] [-k KBRD] [rule [rule ...]]
-
-    positional arguments:
-      rule                  a rule to follow
+    usage: magnetman.py [-h] [-l LID] [-k KBRD] [-u USER]
+                        [-p [PYTHON_RULE [PYTHON_RULE ...]]]
+                        [-r [RULE [RULE ...]]]
 
     optional arguments:
       -h, --help            show this help message and exit
       -l LID, --lid LID     evdev name of the Lid Switch
       -k KBRD, --kbrd KBRD  evdev name of the keyboard
       -u USER, --user USER  user to 'su' into before executing commands
+      -p [PYTHON_RULE [PYTHON_RULE ...]], --python-rule [PYTHON_RULE [PYTHON_RULE ...]]
+                            specify a rule with python sequence syntax
+      -r [RULE [RULE ...]], --rule [RULE [RULE ...]]
+                            specify a rule with simplified sequence syntax
+
+    all rules are formatted as sequence:command.
+
+    simplified sequence syntax:
+        .       a tap
+        [0-9]   that many seconds of holding
+        [a-z]   that key
+
+    python sequence syntax:
+        python syntax expects a python list of values like so:
+
+        "tap"       a tap
+        any number  a hold of that length (seconds)
+        (min, max)  a hold between min and max seconds
+        any string  that key
 
 A rule consists of the sequence to match, followed by a colon (`:`) and the command string to execute.
-Sequences are strings of lowercase characters, didigts and periods, representing keypresses, lid holds (the digit is the hold length in seconds) and taps.
+Simplified sequences are strings of lowercase characters, didigts and periods, representing keypresses, lid holds (the digit is the hold length in seconds) and taps.
 
 Example:
 
     sudo python magnetman.py '...:echo three taps' '.2a:echo tap, two second hold and an A'
 
+Python sequences work like in the python module and are simply parsed using `eval()`.
+
 ### as a module
-More sophisticated rules can be created via the method `add_rule`:
+More sophisticated rules can be created via the python syntax and the method `add_rule`:
 
 ```python
 from magnetman import MagnetMan

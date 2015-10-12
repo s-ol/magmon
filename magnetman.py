@@ -39,6 +39,9 @@ class MagnetMan(object):
                 if exp == act:
                     continue
 
+                if type(act) not in (int, float):
+                    break
+
                 if type(exp) == tuple:
                     if act < exp[0] or act > exp[1]:
                         break
@@ -98,28 +101,45 @@ class MagnetMan(object):
                     self.reschedule()
 
 if __name__ == "__main__":
-    from argparse import ArgumentParser
-    parser = ArgumentParser()
+    from textwrap import dedent
+    from argparse import ArgumentParser, RawDescriptionHelpFormatter
+    parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
+                            epilog=dedent("""\
+                            all rules are formatted as sequence:command.
+
+                            simplified sequence syntax:
+                                .       a tap
+                                [0-9]   that many seconds of holding
+                                [a-z]   that key
+
+                            python sequence syntax:
+                                python syntax expects a python list of values like so:
+
+                                "tap"       a tap
+                                any number  a hold of that length (seconds)
+                                (min, max)  a hold between min and max seconds
+                                any string  that key
+                            """))
     parser.add_argument('-l', '--lid', default="Lid",
                         help="evdev name of the Lid Switch")
     parser.add_argument('-k', '--kbrd', default="keyboard",
                         help="evdev name of the keyboard")
     parser.add_argument('-u', '--user',
                         help="user to 'su' into before executing commands")
-    parser.add_argument('rule', nargs='*', default=['.1.1:killall i3lock', '..a:echo test'],
-                        help="""Rule definition syntax:
-                        <sequence>:<command>
-
-                        where sequence starts with a tap and consists of the following:
-                        .: a tap;
-                        N: (a number) that many seconds of holding;
-                        a: (a character) that key.
-
-                        and commands is an arbitrary shell command to be executed.
-                        """)
+    parser.add_argument('-p', '--python-rule', nargs='*', default=[],
+                        help="specify a rule with python sequence syntax")
+    parser.add_argument('-r', '--rule', nargs='*', default=[],
+                        help="specify a rule with simplified sequence syntax")
     args = parser.parse_args()
 
     magnetman = MagnetMan(user=args.user, kbname=args.kbrd, lidname=args.lid)
+
+    if len(args.python_rule) + len(args.rule) == 0:
+        args.rule = ['.1.1:killall i3lock', '..a:echo test']
+
+    for rule in args.python_rule:
+        rule, action = rule.split(":", 1)
+        magnetman.add_command(eval(rule), action)
 
     for rule in args.rule:
         rule, action = rule.split(":", 1)

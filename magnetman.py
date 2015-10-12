@@ -45,6 +45,7 @@ class MagnetMan(object):
                         break
                 else: break
             else:
+                print(sequence)
                 action()
                 break
         else:
@@ -120,9 +121,9 @@ if __name__ == "__main__":
                         help="evdev name of the keyboard")
     parser.add_argument('-u', '--user',
                         help="user to 'su' into before executing commands")
-    parser.add_argument('-p', '--python-rule', nargs='*', default=[],
+    parser.add_argument('-p', '--python-rule', action="append", default=[],
                         help="specify a rule with python sequence syntax")
-    parser.add_argument('-r', '--rule', nargs='*', default=[],
+    parser.add_argument('-r', '--rule', action="append", default=[],
                         help="specify a rule with simplified sequence syntax")
     parser.add_argument('-s', '--show', action='store_true',
                         help="print list of rules")
@@ -135,13 +136,12 @@ if __name__ == "__main__":
 
     def build_action(string):
         if args.user:
-            return lambda: Popen(['/usr/bin/su', args.user, '-c', action])
+            return lambda: Popen(['/usr/bin/su', args.user, '-c', string])
         else:
-            return lambda: Popen(action, shell=True)
+            return lambda: Popen(string, shell=True)
 
     for rule in args.python_rule:
         rule, action = rule.split(":", 1)
-        #def action():
         magnetman.add_command(eval(rule), build_action(action))
 
     for rule in args.rule:

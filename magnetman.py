@@ -1,5 +1,4 @@
 import asyncio
-from subprocess import Popen
 from evdev import InputDevice, ecodes, categorize, list_devices
 
 class MagnetMan(object):
@@ -7,8 +6,7 @@ class MagnetMan(object):
     SUBMIT_DELAY    = .7
     LID_TOLERANCE   = .5
 
-    def __init__(self, user=None, kbname="keyboard", lidname="Lid"):
-        self.user = user
+    def __init__(self, kbname, lidname):
         self.key = next(InputDevice(dev) for dev in list_devices() if kbname in InputDevice(dev).name)
         self.lid = next(InputDevice(dev) for dev in list_devices() if lidname in InputDevice(dev).name)
         self.loop = asyncio.get_event_loop()
@@ -47,11 +45,7 @@ class MagnetMan(object):
                         break
                 else: break
             else:
-                print("executing '{}'...".format(action))
-                if self.user:
-                    Popen(['/usr/bin/su', self.user, '-c', action])
-                else:
-                    Popen(action, shell=True)
+                action()
                 break
         else:
             print("no command found for {}".format(sequence))
@@ -100,6 +94,7 @@ class MagnetMan(object):
                     self.reschedule()
 
 if __name__ == "__main__":
+    from subprocess import Popen
     from textwrap import dedent
     from argparse import ArgumentParser, RawDescriptionHelpFormatter
     parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
@@ -133,14 +128,21 @@ if __name__ == "__main__":
                         help="print list of rules")
     args = parser.parse_args()
 
-    magnetman = MagnetMan(user=args.user, kbname=args.kbrd, lidname=args.lid)
+    magnetman = MagnetMan(args.kbrd, args.lid)
 
     if len(args.python_rule) + len(args.rule) == 0:
         args.rule = ['.1.1:killall i3lock', '..a:echo test']
 
+    def build_action(string):
+        if args.user:
+            return lambda: Popen(['/usr/bin/su', args.user, '-c', action])
+        else:
+            return lambda: Popen(action, shell=True)
+
     for rule in args.python_rule:
         rule, action = rule.split(":", 1)
-        magnetman.add_command(eval(rule), action)
+        #def action():
+        magnetman.add_command(eval(rule), build_action(action))
 
     for rule in args.rule:
         rule, action = rule.split(":", 1)
@@ -153,7 +155,7 @@ if __name__ == "__main__":
                     seq.append(int(char))
                 except ValueError:
                     seq.append(char)
-        magnetman.add_command(seq, action)
+        magnetman.add_command(seq, build_action(action))
 
     if args.show:
         for pat in magnetman.patterns:

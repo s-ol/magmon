@@ -56,12 +56,13 @@ Example:
 Python sequences work like in the python module and are simply parsed using `eval()`.
 
 ### as a module
-More sophisticated rules can be created via the python syntax and the method `add_rule`:
+More sophisticated rules can be created via the python syntax and the method `add_rule`.
+The python function takes a callback as it's second argument:
 
 ```python
 from magnetman import MagnetMan
-magnetman = MagnetMan(kbname="keyboard", lidname="Lid", user="s0lll0s")
-magnetman.add_rule(['tap', 'a', 1, (1, 3), 'tap'], "echo test")
+magnetman = MagnetMan("keyboard", "Lid")
+magnetman.add_rule(['tap', 'a', 1, (1, 3), 'tap'], lambda: print "test")
 magnetman.watch()
 ```
 

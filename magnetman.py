@@ -19,6 +19,9 @@ class MagnetMan(object):
         self.patterns = []
 
     def add_command(self, pattern, action):
+        for i,v in enumerate(pattern):
+            if type(v) == int or type(v) == float:
+                pattern[i] = (v - self.LID_TOLERANCE/2, v + self.LID_TOLERANCE/2)
         self.patterns.append((pattern, action))
 
     def watch(self):
@@ -35,18 +38,11 @@ class MagnetMan(object):
                 if exp == act:
                     continue
 
-                if exp[0] != act[0]:
+                if type(exp) == tuple:
+                    if act < exp[0] or act > exp[1]:
+                        break
+                else:
                     break
-
-                if exp[0] == 'key':
-                    if exp[1] != act[1]:
-                        break
-                elif exp[0] == 'lid':
-                    if len(exp) > 2: # min & max
-                        if act[1] > exp[1] or act[1] > exp[2]:
-                            break
-                    elif act[1] < exp[1] - self.LID_TOLERANCE/2 or act[1] > exp[1] + self.LID_TOLERANCE/2:
-                        break
             else:
                 print("executing '{}'...".format(action))
                 os.system(action)
@@ -83,7 +79,7 @@ class MagnetMan(object):
                                 self.listening = True
                             except IOError: pass
                     elif self.listening:
-                        self.sequence.append(('lid', evt.timestamp()-self.lastlid))
+                        self.sequence.append(evt.timestamp()-self.lastlid)
                         self.reschedule()
                 else: # lid down
                     self.lastlid = evt.timestamp()
@@ -94,7 +90,7 @@ class MagnetMan(object):
         for evt in self.key.read():
             if evt.type == ecodes.EV_KEY and self.listening:
                 if evt.value == 0: # key up
-                    self.sequence.append(('key', ecodes.KEY[evt.code][4:].lower()))
+                    self.sequence.append(ecodes.KEY[evt.code][4:].lower())
                     self.reschedule()
 
 if __name__ == "__main__":
@@ -127,9 +123,9 @@ if __name__ == "__main__":
                 seq.append('tap')
             else:
                 try:
-                    seq.append(('lid', int(char)))
+                    seq.append(int(char))
                 except ValueError:
-                    seq.append(('key', char))
+                    seq.append(char)
         magnetman.add_command(seq, action)
 
     magnetman.watch()

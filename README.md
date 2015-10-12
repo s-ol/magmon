@@ -39,12 +39,12 @@ More sophisticated rules can be created via the method `add_rule`:
 ```python
 from magnetman import MagnetMan
 magnetman = MagnetMan("keyboard", "Lid")
-magnetman.add_rule(['tap', ('key', 'a'), ('lid', 1), ('lid', 1, 3), 'tap'], "echo test")
+magnetman.add_rule(['tap', 'a', 1, (1, 3), 'tap'], "echo test")
 magnetman.watch()
 ```
 
 Like on the CLI, there are three possible sequence entries:
 
 * taps, which are .5s long, represented as the string `'tap'`,
-* key presses, represented as a tuple of the string `'tap'` and the key,
-* lid holds, represented as the string `'lid'` and the upper and lower length-boundaries in seconds. If the upper limit is left out, a margin of .5s is used around that length.
+* key presses, represented as a string containign the character they match
+* lid holds, represented as the either the expected duration, matched +- MagnetMan.LID_TOLERANCE/2, or a tuple with upper and lower length boundaries (in seconds)

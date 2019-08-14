@@ -1,7 +1,7 @@
 import asyncio
 from evdev import InputDevice, ecodes, categorize, list_devices
 
-class MagnetMan(object):
+class Magmon(object):
     TAP_LENGTH      = .5
     SUBMIT_DELAY    = .7
     LID_TOLERANCE   = .5
@@ -129,7 +129,7 @@ if __name__ == "__main__":
                         help="print list of rules")
     args = parser.parse_args()
 
-    magnetman = MagnetMan(args.kbrd, args.lid)
+    magmon = Magmon(args.kbrd, args.lid)
 
     if len(args.python_rule) + len(args.rule) == 0:
         args.rule = ['.1.1:killall i3lock', '..a:echo test']
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     for rule in args.python_rule:
         rule, action = rule.split(":", 1)
-        magnetman.add_command(eval(rule), build_action(action))
+        magmon.add_command(eval(rule), build_action(action))
 
     for rule in args.rule:
         rule, action = rule.split(":", 1)
@@ -155,10 +155,10 @@ if __name__ == "__main__":
                     seq.append(int(char))
                 except ValueError:
                     seq.append(char)
-        magnetman.add_command(seq, build_action(action))
+        magmon.add_command(seq, build_action(action))
 
     if args.show:
-        for pat in magnetman.patterns:
+        for pat in magmon.patterns:
             print("'{}' on {}".format(pat[1], pat[0]))
 
-    magnetman.watch()
+    magmon.watch()

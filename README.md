@@ -1,7 +1,10 @@
 Magmon
 =========
 
-*Magmon* is a small python tool that listens for keystrokes and lid-switch patterns, activated by tapping the lid-switch once.
+Laptops usually contain a little magnetic sensor (called the "lid switch") that is activated by a corresponding magnet when the lid is folded shut.
+With a magnetic implant this sensor can be triggered manually.
+*Magmon* is a small python tool for detecting patterns from such interactions and keystrokes,
+activated by tapping the lid-switch once.
 It can be used to add little extra commands to trigger using magnetic implants.
 
 Usage
@@ -14,7 +17,7 @@ A rule maps a sequence to a system command to be executed when the sequence is m
 Elevated privileges may be required to access the lidswitch or grab the keyboard focus.
 
 ### "standalone"
-*Magmon* comes with a convenient CLI for defining rules on the commandline.
+*Magmon* comes with a convenient CLI for defining rules on the command-line.
 
     usage: magmon.py [-h] [-l LID] [-k KBRD] [-u USER]
                      [-p [PYTHON_RULE [PYTHON_RULE ...]]]
@@ -70,4 +73,4 @@ Like on the CLI, there are three possible sequence entries:
 
 * taps, which are .5s long, represented as the string `'tap'`,
 * key presses, represented as a string containign the character they match
-* lid holds, represented as the either the expected duration, matched +- Magmon.LID_TOLERANCE/2, or a tuple with upper and lower length boundaries (in seconds)
+* lid holds, represented as the either the expected duration, matched +- `Magmon.LID_TOLERANCE/2`, or a tuple with upper and lower length boundaries (in seconds)
